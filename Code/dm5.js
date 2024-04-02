@@ -242,6 +242,8 @@ const dmMachine = setup({
             {guard :and([({event})=> helpIntent(event.nluValue.topIntent), ({event}) => event.nluValue.entities.length === 0 ]),
             actions : [{type : "say", params : help[3]}],
             target : "Ask"},
+            {guard : ({event})=> event.nluValue.entities.length === 0,
+            target : "Ask"},
             { guard : ({event}) => event.nluValue.entities[0].length > 0,
             actions : assign({ person : ({event}) => event.nluValue.entities[0].text }),
             target : "DayQuestion"},
@@ -271,11 +273,15 @@ const dmMachine = setup({
               {guard :and([({event})=> helpIntent(event.nluValue.topIntent), ({event}) => event.nluValue.entities.length === 0 ]),
               actions : {type : "say", params : help[4]},
               target : "DayQuestion"},
-              { guard : ({event}) => event.nluValue.entities[0].length > 0,
+              {guard : and([({event}) => event.nluValue.entities[0].category === "day", ({event}) => event.nluValue.entities[0].length > 0,]),
               actions : assign({ day : ({event}) => event.nluValue.entities[0].text }),
               target : "WholeDay"},
-              {target : "IntentNotRecognised"}]
+              {target : "ChooseDay"}]
           }
+        },
+        ChooseDay : {
+          entry : [{type : "say", params : `You need to tell me a day`}],
+          on : {SPEAK_COMPLETE : "DayQuestion"}
         },
         CantHearDay : {
           entry : [{type : "say", params : `I didn't hear you.`}],
