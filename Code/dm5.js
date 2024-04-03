@@ -70,6 +70,18 @@ function checkNegative(event) {
 function helpIntent(event) {
   return event === "help";
 }
+function getDay(entities) {
+  const day = [];
+  for (const key in entities) {
+    if (entities.hasOwnProperty(key)) {
+      const entity = entities[key];
+      if (entity.category === 'day') {
+        day.push(entity.text);
+      }
+    }
+  }
+  return day.toString();
+}
 const dmMachine = setup({
   actions: {
     say: ({ context }, params) =>
@@ -273,8 +285,9 @@ const dmMachine = setup({
               {guard :and([({event})=> helpIntent(event.nluValue.topIntent), ({event}) => event.nluValue.entities.length === 0 ]),
               actions : {type : "say", params : help[4]},
               target : "DayQuestion"},
-              {guard : and([({event}) => event.nluValue.entities[0].category === "day", ({event}) => event.nluValue.entities[0].length > 0,]),
-              actions : assign({ day : ({event}) => event.nluValue.entities[0].text }),
+              {guard : ({event}) =>  event.nluValue.entities[0].length > 0,
+              actions : assign({ day : ({event}) => getDay(event.nluValue.entities)
+             }),
               target : "WholeDay"},
               {target : "ChooseDay"}]
           }
